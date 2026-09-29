@@ -227,6 +227,7 @@ def build_html(hf, vllm, concurrency, kv):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
 <title>Prompt2GPU V1.0 Dashboard</title>
 <style>
 :root {{ --bg:#0b1020; --card:#141b2d; --text:#edf2f7; --muted:#aab4c6; --accent:#72a7ff; --border:#263149; }}
