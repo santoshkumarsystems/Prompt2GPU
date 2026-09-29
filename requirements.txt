@@ -1,0 +1,6 @@
+# Prompt2GPU default requirements: lightweight presentation only.
+#
+# This file intentionally does NOT install PyTorch, CUDA, cuDNN, NCCL, or vLLM.
+# Published V1.0 results can be viewed in docs/index.html with zero installation.
+# Install this file only if you want to rebuild the dashboard/plots.
+-r requirements-dashboard.txt

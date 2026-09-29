@@ -1,0 +1,11 @@
+# Prompt2GPU OPTIONAL GPU benchmark environment.
+#
+# DO NOT install this file directly as the normal first step.
+# Run: make setup-gpu
+# That command checks for NVIDIA hardware first, warns about multi-GB downloads
+# and expected time, and requires explicit confirmation.
+requests>=2.31
+transformers>=4.45
+accelerate>=0.34
+sentencepiece>=0.2
+vllm==0.30.0

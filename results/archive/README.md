@@ -1,0 +1,1 @@
+Preliminary one-batch concurrency measurements retained for provenance. Published V1.0 results use vllm_concurrency_raw.csv / batches.csv / summary.json with five measured batches per concurrency level.
