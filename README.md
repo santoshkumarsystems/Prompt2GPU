@@ -5,6 +5,7 @@
 **Author:** Santosh Kumar
 **Version:** 1.0 (V1.0)
 **Published V1.0 environment:** Google Colab · NVIDIA Tesla T4 · Qwen/Qwen2.5-1.5B-Instruct · FP16
+**Live dashboard:** [Prompt2GPU V1.0 Interactive Dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/)
 
 Prompt2GPU is a measurement-first AI-infrastructure project. V1.0 compares a controlled Hugging Face/PyTorch generation baseline with vLLM on one Tesla T4, then measures concurrency scaling and context/KV-cache pressure.
 
@@ -17,7 +18,7 @@ Prompt2GPU is a measurement-first AI-infrastructure project. V1.0 compares a con
 You do **not** need Python, CUDA, PyTorch, vLLM, or an NVIDIA GPU to inspect V1.0.
 
 - Read the measured findings below or in [`RESULTS.md`](RESULTS.md).
-- Open [`docs/index.html`](docs/index.html) directly for the committed interactive dashboard.
+- Open the [live Prompt2GPU V1.0 interactive dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/) — no local setup required.
 - View the committed charts in [`plots/`](plots/).
 - Inspect the raw evidence in [`results/`](results/).
 
