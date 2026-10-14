@@ -1,28 +1,43 @@
 # Prompt2GPU
 
-**LLM Inference Systems Lab — vLLM, concurrency, KV-cache pressure, and GPU performance**
+**LLM Inference Systems Lab — vLLM · GPU observability · prefill/decode · KV-cache performance**
 
-**Author:** Santosh Kumar
-**Version:** 1.0 (V1.0)
-**Published V1.0 environment:** Google Colab · NVIDIA Tesla T4 · Qwen/Qwen2.5-1.5B-Instruct · FP16
-**Live dashboard:** [Prompt2GPU V1.0 Interactive Dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/)
+Measurement-first AI infrastructure research using real NVIDIA Tesla T4 experiments: serving throughput, request latency, concurrency scaling, KV-cache pressure, and inference-runtime behavior.
 
-Prompt2GPU is a measurement-first AI-infrastructure project. V1.0 compares a controlled Hugging Face/PyTorch generation baseline with vLLM on one Tesla T4, then measures concurrency scaling and context/KV-cache pressure.
+**Author:** Santosh Kumar · **Latest release:** V1.1 · **GPU:** NVIDIA Tesla T4 · **Model:** Qwen2.5-1.5B-Instruct
 
-> **Evidence policy:** every published benchmark number comes from committed raw CSV/JSON artifacts. The dashboard and plots are generated from those artifacts; benchmark values are not manually typed into chart code.
+## Explore the interactive V1.1 dashboard
+
+[![Actual Prompt2GPU V1.1 batch-performance dashboard showing throughput, first-token latency, and decode phase P95](docs/images/v1_1_dashboard_preview.png)](https://santoshkumarsystems.github.io/Prompt2GPU/v1_1.html)
+
+### **[▶ Launch the V1.1 Interactive Dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/v1_1.html)**
+
+*Click the screenshot or the link above to explore the working historical replay. No GPU, installation, or account required. The preview is a screenshot of the actual published measurements, not generated benchmark data.*
+
+**What the experiments demonstrate**
+
+- **Real concurrency workloads:** two measured C64 streaming runs, 320 requests each; mean aggregate output throughput of **1,917.87** and **1,994.69 tokens/s**, respectively, in the tested setup.
+- **A first-token latency anomaly:** initial Batch 2 mean TTFT increased from **350.2 ms** (Batch 1) to **1,894.5 ms**. A Triton attention-kernel JIT warning occurred during Batch 2; temporal correlation is **not** proof of causation.
+- **Live-captured metrics, replayed publicly:** Prometheus/Grafana observability from the real GPU runs, synchronized with request-level streaming measurements. Prefill P95 uses the exported server histogram; decode-phase P95 is derived from captured client streaming timings, not GPU-kernel duration.
+
+**Explore the evidence:** [V1.1 findings](V1_1_FINDINGS.md) · [V1.1 raw measurements](results_v1_1/) · [Benchmark and telemetry methodology](observability/V1_1_CONCURRENCY.md)
+
+**Earlier release:** [Launch V1.0 benchmark dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/) · [V1.0 measured results](RESULTS.md)
+
+> **Evidence policy:** Published benchmark values are grounded in committed raw CSV/JSON measurements. The public dashboards display recorded results; they do not run live inference or fabricate GPU samples.
 
 ![Prompt2GPU measurement architecture](docs/architecture.svg)
 
 ## V1.1 — Streaming observability and Triton JIT investigation
 
-[V1.1 interactive historical dashboard](docs/v1_1.html) — playback of **recorded** T4 metrics and client-side measurements; no live server or synthetic GPU data.
+[V1.1 interactive historical dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/v1_1.html) — playback of **recorded** T4 metrics and client-side measurements; no live server or synthetic GPU data.
 
 
 Measured follow-on C64/T4 experiments add client-observed TTFT/TPOT/conditional ITL, 12 exported Prometheus time series, and a corroborated runtime log warning during an anomalous batch. The repeat was more consistent without a new Triton JIT warning. This is correlation, **not** an isolated causal proof. See [V1.1 measured findings](V1_1_FINDINGS.md) and [`results_v1_1/`](results_v1_1/) for the original measured evidence. The existing V1.0 dashboard remains V1.0 and is not presented as V1.1 telemetry.
 
 ### V1.1 evidence provenance and Triton JIT annotation
 
-**Real GPU measurements, offline replay — not a simulation of GPU inference.** We executed two concurrency-64 streaming experiments on a Google Colab NVIDIA Tesla T4 using Qwen2.5-1.5B-Instruct and vLLM 0.31.0. During those runs, Prometheus scraped vLLM server metrics every **5 seconds**, and **Grafana displayed those real metrics while the GPU experiment was running**. We then exported the recorded Prometheus time series and the client benchmark's request/batch CSV measurements. The public [V1.1 historical replay](docs/v1_1.html) renders **those same measured series** as interactive, Grafana-style panels using Plotly.js. It does **not** run Grafana, a GPU, or an inference server; the Play button only advances through saved timestamps. No GPU samples are invented or interpolated.
+**Real GPU measurements, offline replay — not a simulation of GPU inference.** We executed two concurrency-64 streaming experiments on a Google Colab NVIDIA Tesla T4 using Qwen2.5-1.5B-Instruct and vLLM 0.31.0. During those runs, Prometheus scraped vLLM server metrics every **5 seconds**, and **Grafana displayed those real metrics while the GPU experiment was running**. We then exported the recorded Prometheus time series and the client benchmark's request/batch CSV measurements. The public [V1.1 historical replay](https://santoshkumarsystems.github.io/Prompt2GPU/v1_1.html) renders **those same measured series** as interactive, Grafana-style panels using Plotly.js. It does **not** run Grafana, a GPU, or an inference server; the Play button only advances through saved timestamps. No GPU samples are invented or interpolated.
 
 **What the Triton JIT annotation means.** Triton can compile a new attention-kernel specialization *just in time* when inference first encounters a configuration not covered by warm-up. The private vLLM engine log recorded `kernel_unified_attention` JIT compilation at **05:02:05 UTC** inside the initial run's slow **Batch 2**. Mean client TTFT increased from approximately **350 ms** in Batch 1 to **1,895 ms** in Batch 2, while mean TPOT remained near **28.4–28.7 ms**. On the warm-server repeat, no additional JIT warning appeared and the anomalous latency spike did not recur. **This is a plausible JIT-related latency explanation, not an isolated proof of causality**: compile duration was not independently measured and cache/warm-state effects were not controlled.
 
@@ -32,8 +47,9 @@ Measured follow-on C64/T4 experiments add client-observed TTFT/TPOT/conditional 
 
 ## View the published results — zero install
 
-You do **not** need Python, CUDA, PyTorch, vLLM, or an NVIDIA GPU to inspect V1.0.
+You do **not** need Python, CUDA, PyTorch, vLLM, or an NVIDIA GPU to explore either published dashboard.
 
+- **Explore V1.1:** [Launch the interactive historical dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/v1_1.html).
 - Read the measured findings below or in [`RESULTS.md`](RESULTS.md).
 - Open the [live Prompt2GPU V1.0 interactive dashboard](https://santoshkumarsystems.github.io/Prompt2GPU/) — no local setup required.
 - View the committed charts in [`plots/`](plots/).
@@ -102,7 +118,7 @@ For interpretation and limitations, read [`RESULTS.md`](RESULTS.md) and [`METHOD
 **Download:** none
 **NVIDIA GPU:** not required
 
-Open `docs/index.html` or browse this README/results. No setup command is required.
+Open the linked GitHub Pages dashboards or browse this README/results. No setup command is required.
 
 ### Path B — verify the published evidence
 
