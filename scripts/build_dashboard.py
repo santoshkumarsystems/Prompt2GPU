@@ -254,6 +254,7 @@ a {{ color:#9cc2ff; }}
 </head>
 <body><div class="wrap">
 <h1>Prompt2GPU V1.0</h1>
+<p class="note"><strong>New:</strong> <a href="v1_1.html">V1.1 recorded inference observability replay</a> (initial run vs warm-server repeat; real measurements, not live telemetry).</p>
 <p class="lead">A single-GPU LLM inference systems lab measuring a Hugging Face/PyTorch baseline against vLLM, then exploring concurrency scaling and context/KV-cache pressure on a Tesla T4 using Qwen2.5-1.5B-Instruct.</p>
 <p class="lead"><strong>Published measurements:</strong> Google Colab · NVIDIA Tesla T4 · Qwen/Qwen2.5-1.5B-Instruct · FP16 · Prompt2GPU V1.0</p>
 <div class="cards">

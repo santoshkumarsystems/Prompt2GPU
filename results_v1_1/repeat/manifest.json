@@ -1,0 +1,14 @@
+{
+  "original_run_folder": "v1_1_c64_repeat_20261013T052834Z",
+  "original_benchmark_source_sha256": "7968bb0bd7ecfbdb1d91a4ec53f74b4b7c75b82257d0483523e68707984f8b39",
+  "private_engine_log_sha256": null,
+  "published_measurements_sha256": {
+    "vllm_concurrency_raw.csv": "f0156a9049d62cf82c5bef5942e4e12b0a317ee9b0ea83d7bac5140b9fb6f390",
+    "vllm_concurrency_batches.csv": "de713a96af9db6a8276aa1a8d98bea07d57e149e6894a5b1bf9d36aaa39b9fef",
+    "vllm_concurrency_itl.csv": "8fab6cdadcdcd3d2f9a9cc1a171cf4f086a0b0c30b1c5b4c6d22b57b80308587",
+    "vllm_concurrency_summary.json": "7d0940ce4bb7209756a504453351b83b619bfb369d4e792154fd3963df123a9f",
+    "prometheus_timeseries.json": "4729990a3562c782120ea8bc4f77eefd7c48f61630d6b45ff4533d1d217ef249"
+  },
+  "engine_log_published": false,
+  "artifact_classification": "real measured Colab T4 data; not synthetic"
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Prompt2GPU V1.1 historical T4 vLLM inference observability replay with client latency and Prometheus series.">
+  <link rel="icon" href="data:,">
+  <title>Prompt2GPU V1.1 | Recorded Inference Observability</title>
+  <link rel="stylesheet" href="v1_1_dashboard.css">
+  <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script defer src="v1_1_dashboard.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell navrow">
+      <a href="index.html" class="brand"><span class="brandmark">P2</span> Prompt2GPU <span class="version">V1.1</span></a>
+      <div class="navlinks"><a href="index.html">V1 baseline</a><a href="https://github.com/santoshkumarsystems/Prompt2GPU/blob/main/V1_1_FINDINGS.md" target="_blank" rel="noopener noreferrer">Evidence &amp; methods ↗</a></div>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot"></span> GPU inference · observability lab</div>
+      <h1>Inference performance, <span class="gradient">under the microscope.</span></h1>
+      <p>Real measurements from two Qwen2.5-1.5B-Instruct / vLLM 0.31.0 experiments on a Tesla T4. Compare the initial concurrency-64 run with its warm-server repeat and inspect the logged Triton JIT anomaly.</p>
+      <div class="safety"><strong>RECORDED DATA · NOT LIVE</strong><span>Replaying timestamped Prometheus scrapes and client measurements. No running inference server, no generated or interpolated GPU values.</span></div>
+    </section>
+
+    <section class="toolbar" aria-label="Replay controls">
+      <div class="controlgroup">
+        <label for="run-choice">Experiment</label>
+        <select id="run-choice">
+          <option value="initial">Initial · JIT warning</option>
+          <option value="repeat">Warm-server repeat</option>
+          <option value="compare">Compare both runs</option>
+        </select>
+      </div>
+      <div class="controlgroup replay-controls">
+        <label for="time-cursor">Recorded sample cursor</label>
+        <div class="timeline">
+          <button id="play" type="button" aria-label="Play recorded sample cursor">▶ Play</button>
+          <input id="time-cursor" type="range" min="0" max="0" value="0" step="1" aria-label="Recorded scrape index" disabled>
+          <span id="time-indicator">—</span>
+        </div>
+      </div>
+      <div class="controlgroup"><label>Scrape interval</label><strong>5 seconds</strong></div>
+    </section>
+
+    <div id="message" class="message" role="status">Loading published measurement exports…</div>
+    <section id="dashboard" hidden>
+      <section class="kpis" aria-label="Measured summary">
+        <article class="kpicard"><span>Mean aggregate throughput</span><strong id="kpi-throughput">—</strong><small>Measured completion tokens/sec</small></article>
+        <article class="kpicard"><span>P95 client TTFT</span><strong id="kpi-ttft">—</strong><small>Time to first SSE content event</small></article>
+        <article class="kpicard"><span>P95 request latency</span><strong id="kpi-latency">—</strong><small>End-to-end seconds</small></article>
+        <article class="kpicard"><span>P95 client TPOT</span><strong id="kpi-tpot">—</strong><small>Milliseconds / output token</small></article>
+      </section>
+
+      <div class="sectionhead"><div><div class="eyebrow">01 / Benchmarked workloads</div><h2>Batch performance</h2></div><span class="hint">5 × 64 measured HTTP requests per run · 128 output tokens/request</span></div>
+      <div class="triplecharts">
+        <div class="panel"><div class="panel-head"><h3>Aggregate output throughput</h3><span>client · tok/s</span></div><div id="batch-throughput" class="batchchart" role="img" aria-label="Batch throughput chart"></div></div>
+        <div class="panel"><div class="panel-head"><h3>Mean time to first token</h3><span>client · milliseconds</span></div><div id="batch-ttft" class="batchchart" role="img" aria-label="Batch first-token latency chart"></div></div>
+        <div class="panel"><div class="panel-head"><h3>Decode Phase Duration — P95</h3><span>measured content span · milliseconds</span></div><div id="batch-decode-proxy" class="batchchart" role="img" aria-label="Decode phase client proxy P95 by batch"></div></div>
+      </div>
+      <p class="sampling"><strong>Method:</strong> Prefill is recorded by vLLM Prometheus; decode-phase duration is calculated from recorded streaming token timings (output tokens − 1) × TPOT. These use different timing boundaries; decode is not simulated and is not GPU-kernel time.</p>
+      <div id="jit-note" class="incident"><span class="alert-icon">!</span><div><strong>Triton JIT event in initial run · 05:02:05 UTC</strong><p>Just-in-time (JIT) compilation turns a Triton attention-kernel specialization into GPU-executable code when it is first needed. If warm-up did not cover that shape/configuration, compilation during inference can delay the first streamed token.</p><p>The private engine log reported <code>kernel_unified_attention</code> compilation in Batch 2 (05:02:05 UTC). Mean client TTFT rose from ~350 ms to ~1,895 ms while TPOT stayed near 28 ms; a warm-server repeat had no new warning. <strong>Correlation, not isolated proof of causality.</strong> Log timestamp precision: one second; compilation duration was not measured.</p></div></div>
+
+      <div class="sectionhead"><div><div class="eyebrow">02 / Runtime timeline</div><h2>Recorded inference telemetry</h2></div><span class="hint">Recorded server metrics + streamed decode-phase measurements</span></div>
+      <div id="metrics-grid" class="metricsgrid" aria-label="Nine recorded Prometheus series and one synchronized decode-phase chart">
+        <article class="panel" data-metric="output_tokens_per_sec"><div class="panel-head"><h3>Output token rate</h3><span>1m Prometheus rate · tok/s</span></div><div id="metric-output_tokens_per_sec" class="timeseries"></div></article>
+        <article class="panel" data-metric="running_requests"><div class="panel-head"><h3>Running requests</h3><span>sampled gauge · count</span></div><div id="metric-running_requests" class="timeseries"></div></article>
+        <article class="panel" data-metric="waiting_requests"><div class="panel-head"><h3>Waiting requests</h3><span>sampled gauge · count</span></div><div id="metric-waiting_requests" class="timeseries"></div></article>
+        <article class="panel" data-metric="kv_cache_usage_percent"><div class="panel-head"><h3>KV-cache utilization</h3><span>sampled gauge · %</span></div><div id="metric-kv_cache_usage_percent" class="timeseries"></div></article>
+        <article class="panel" data-metric="p95_ttft_seconds"><div class="panel-head"><h3>P95 first-token latency</h3><span>5m histogram · seconds</span></div><div id="metric-p95_ttft_seconds" class="timeseries"></div></article>
+        <article class="panel" data-metric="p95_tpot_seconds"><div class="panel-head"><h3>P95 time/output token</h3><span>5m histogram · seconds</span></div><div id="metric-p95_tpot_seconds" class="timeseries"></div></article>
+        <article class="panel" data-metric="p95_queue_seconds"><div class="panel-head"><h3>P95 queue duration</h3><span>5m histogram · seconds</span></div><div id="metric-p95_queue_seconds" class="timeseries"></div></article>
+        <article class="panel" data-metric="p95_prefill_seconds"><div class="panel-head"><h3>Prefill Duration — P95</h3><span>5m histogram · seconds</span></div><div id="metric-p95_prefill_seconds" class="timeseries"></div></article>
+        <article class="panel" data-client-proxy="decode"><div class="panel-head"><h3>Decode Phase Duration — P95</h3><span>recorded batches · milliseconds</span></div><div id="metric-decode-proxy" class="timeseries" role="img" aria-label="P95 post-first-token duration for recorded streaming batches, synchronized to the replay cursor"></div><p id="decode-replay-status" class="sampling" aria-live="polite">Waiting for first completed batch.</p><p class="sampling">Derived from recorded streaming token timings; each point is a batch P95, not a Prometheus scrape or GPU decode-kernel timing. The line connects recorded batch summaries only; the replay cursor highlights the latest completed batch.</p></article>
+        <article class="panel" data-metric="prefix_cache_hit_rate_percent"><div class="panel-head"><h3>Prefix-cache token hit ratio</h3><span>5m rolling rate · %</span></div><div id="metric-prefix_cache_hit_rate_percent" class="timeseries"></div></article>
+      </div>
+      <p class="sampling"><strong>Sampling limitations:</strong> Each benchmark batch lasts roughly 4–6 seconds, comparable to the 5-second Prometheus scrape interval. A batch may have zero or one overlapping scrape. Prometheus rates use 1-minute windows, and histogram quantiles use 5-minute windows. Chart gaps mean no observation, not zero. Client TTFT/TPOT measurements and server histogram estimates use different timing boundaries.</p>
+      <div class="sectionhead"><div><div class="eyebrow">03 / Reproducible evidence</div><h2>Audit trail</h2></div></div>
+      <section class="audit-grid"><article class="audit-card"><h3>Measured sources</h3><p>Original request, batch, and SSE interval CSVs; Prometheus <code>query_range</code> exports; SHA256 manifests.</p><a href="https://github.com/santoshkumarsystems/Prompt2GPU/tree/main/results_v1_1" target="_blank" rel="noopener noreferrer">Browse measured data ↗</a></article>
+      <article class="audit-card"><h3>Recompute, don't assume</h3><p>Use <code>scripts/publish_v1_1.py</code> to validate 640 measured requests, and <code>scripts/build_v1_1_dashboard.py --check</code> to ensure charts exactly match source evidence.</p><a href="https://github.com/santoshkumarsystems/Prompt2GPU/blob/main/V1_1_FINDINGS.md" target="_blank" rel="noopener noreferrer">Read methodology ↗</a></article></section>
+    </section>
+    <footer>Prompt2GPU · Historical performance analysis · Tesla T4 / vLLM 0.31.0 · Original V1 results remain unchanged</footer>
+  </main>
+</body>
+</html>

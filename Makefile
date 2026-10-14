@@ -71,6 +71,7 @@ stop-vllm:
 
 audit:
 	$(PYTHON3) scripts/audit_repo.py
+	$(PYTHON3) scripts/build_v1_1_dashboard.py --check
 
 clean:
 	rm -rf src/__pycache__ scripts/__pycache__
